@@ -31,13 +31,16 @@ export function parseTemplates(value: unknown): FolderTemplate[] {
   return result;
 }
 
+export function templateDisplayTitle(template: FolderTemplate, index: number): string {
+  return template.title.length > 0 ? template.title : slotLabel(index);
+}
+
 export function templatePrompt(template: FolderTemplate, index: number): string {
-  const slot = slotLabel(index);
-  const title = template.title.length > 0 ? template.title : slot;
+  const title = templateDisplayTitle(template, index);
   if (template.files.length === 0) {
-    return `${slot}「${title}」将创建空文件夹`;
+    return `「${title}」将创建空文件夹`;
   }
-  return `${slot}「${title}」将创建：${template.files.join("、")}`;
+  return `「${title}」将创建：${template.files.join("、")}`;
 }
 
 export function folderNameError(raw: string): string | undefined {

@@ -4,9 +4,7 @@ import { consumeSkip } from "./skip";
 import {
   folderNameError,
   parseTemplates,
-  TEMPLATE_SLOT_COUNT,
-  templateCommandId,
-  templateContextKey,
+  templateDisplayTitle,
   templatePrompt,
 } from "./templates";
 
@@ -30,29 +28,17 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand("folderScaffold.openSettings", () => {
       return vscode.commands.executeCommand("workbench.action.openSettings", "folderScaffold");
     }),
+    vscode.commands.registerCommand("folderScaffold.newFromTemplate", (uri?: vscode.Uri) => {
+      return newFromTemplate(uri, output);
+    }),
   );
-
-  for (let index = 0; index < TEMPLATE_SLOT_COUNT; index++) {
-    const slot = index;
-    context.subscriptions.push(
-      vscode.commands.registerCommand(templateCommandId(slot), (uri?: vscode.Uri) => {
-        return createFromTemplate(slot, uri, output);
-      }),
-    );
-  }
 }
 
 export function deactivate(): void {}
 
 function publishTemplateSlots(): void {
   const templates = parseTemplates(vscode.workspace.getConfiguration(SECTION).get("templates"));
-  for (let index = 0; index < TEMPLATE_SLOT_COUNT; index++) {
-    void vscode.commands.executeCommand(
-      "setContext",
-      templateContextKey(index),
-      index < templates.length,
-    );
-  }
+  void vscode.commands.executeCommand("setContext", "folderScaffold.hasTemplates", templates.length > 0);
 }
 
 async function scaffoldCreated(uris: readonly vscode.Uri[], output: vscode.OutputChannel): Promise<void> {
@@ -94,26 +80,34 @@ async function scaffoldFolder(uri: vscode.Uri, output: vscode.OutputChannel): Pr
   }
 }
 
-async function createFromTemplate(
-  index: number,
-  resource: vscode.Uri | undefined,
-  output: vscode.OutputChannel,
-): Promise<void> {
+async function newFromTemplate(resource: vscode.Uri | undefined, output: vscode.OutputChannel): Promise<void> {
   const parent = await resolveParent(resource);
   if (!parent) {
     return;
   }
 
   const templates = parseTemplates(vscode.workspace.getConfiguration(SECTION, parent).get("templates"));
-  const template = templates[index];
-  if (!template) {
-    void vscode.window.showInformationMessage(`未配置模板 ${index + 1}`);
+  if (templates.length === 0) {
+    void vscode.window.showInformationMessage("未配置模板");
+    return;
+  }
+
+  const picked = await vscode.window.showQuickPick(
+    templates.map((template, index) => ({
+      label: templateDisplayTitle(template, index),
+      description: template.files.length === 0 ? "空文件夹" : template.files.join("、"),
+      template,
+      index,
+    })),
+    { placeHolder: "选择模板" },
+  );
+  if (!picked) {
     return;
   }
 
   const entered = await vscode.window.showInputBox({
     placeHolder: "文件夹名称",
-    prompt: templatePrompt(template, index),
+    prompt: templatePrompt(picked.template, picked.index),
     validateInput: (value) => folderNameError(value),
   });
   if (entered === undefined) {
@@ -125,7 +119,7 @@ async function createFromTemplate(
     return;
   }
 
-  for (const fileName of template.files) {
+  for (const fileName of picked.template.files) {
     await writeTemplateFile(folder, fileName, output);
   }
 }

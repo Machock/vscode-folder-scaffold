@@ -5,6 +5,7 @@ import {
   TEMPLATE_SLOT_COUNT,
   templateCommandId,
   templateContextKey,
+  templateDisplayTitle,
   templatePrompt,
 } from "./templates";
 
@@ -44,18 +45,23 @@ test("只保留前 8 条有效模板", () => {
   assert.deepStrictEqual(parsed[7], { title: "T7", files: ["f7.txt"] });
 });
 
-test("提示文案带槽位序号和文件列表", () => {
+test("显示名使用自定义标题", () => {
+  assert.strictEqual(templateDisplayTitle({ title: "Python 包", files: [] }, 0), "Python 包");
+  assert.strictEqual(templateDisplayTitle({ title: "", files: [] }, 1), "模板 2");
+});
+
+test("提示文案使用自定义标题", () => {
   assert.strictEqual(
     templatePrompt({ title: "Python 包", files: ["__init__.py"] }, 0),
-    "模板 1「Python 包」将创建：__init__.py",
+    "「Python 包」将创建：__init__.py",
   );
   assert.strictEqual(
     templatePrompt({ title: "", files: [] }, 1),
-    "模板 2「模板 2」将创建空文件夹",
+    "「模板 2」将创建空文件夹",
   );
   assert.strictEqual(
     templatePrompt({ title: "组件", files: ["index.tsx", "style.css"] }, 2),
-    "模板 3「组件」将创建：index.tsx、style.css",
+    "「组件」将创建：index.tsx、style.css",
   );
 });
 
