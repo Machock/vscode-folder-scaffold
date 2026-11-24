@@ -159,6 +159,10 @@ async function pickWorkspaceRoot(): Promise<vscode.Uri | undefined> {
 }
 
 async function createDirectorySkippingAuto(uri: vscode.Uri, output: vscode.OutputChannel): Promise<boolean> {
+  if (await isDirectory(uri)) {
+    return true;
+  }
+
   const key = uri.toString();
   skippedDirectories.add(key);
   try {
