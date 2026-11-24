@@ -1,0 +1,102 @@
+{
+  "name": "folder-scaffold",
+  "displayName": "Folder Scaffold",
+  "description": "新建文件夹时按设置自动创建 __init__.py、index.ts、index.tsx 等文件",
+  "version": "0.1.0",
+  "publisher": "local",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "folderScaffold.openSettings",
+        "title": "Folder Scaffold: 打开设置"
+      }
+    ],
+    "configuration": {
+      "title": "Folder Scaffold",
+      "properties": {
+        "folderScaffold.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "是否在新建文件夹时自动创建文件。"
+        },
+        "folderScaffold.defaultFiles": {
+          "type": "array",
+          "default": [
+            "__init__.py"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "markdownDescription": "没有规则命中时，在新建文件夹里创建这些文件。改成 `[\"index.ts\"]` 或 `[\"index.tsx\"]` 即可更换默认文件；设为 `[]` 则默认不创建。"
+        },
+        "folderScaffold.rules": {
+          "type": "array",
+          "default": [],
+          "markdownDescription": "按顺序匹配新建文件夹的工作区相对路径。命中第一条后，只创建该规则的 `files`，不再使用 `defaultFiles`。`files` 为空表示命中后不创建任何文件。",
+          "items": {
+            "type": "object",
+            "required": [
+              "pattern",
+              "files"
+            ],
+            "properties": {
+              "pattern": {
+                "type": "string",
+                "description": "文件夹相对路径的 glob。例如 **/components/**，或用 ** 匹配所有文件夹。"
+              },
+              "files": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "要创建的文件名，例如 __init__.py、index.ts、index.tsx。"
+              }
+            }
+          }
+        },
+        "folderScaffold.exclude": {
+          "type": "array",
+          "default": [
+            "**/node_modules/**",
+            "**/.git/**",
+            "**/.venv/**",
+            "**/venv/**",
+            "**/dist/**",
+            "**/build/**",
+            "**/__pycache__/**",
+            "**/.vscode/**",
+            "**/.cursor/**"
+          ],
+          "items": {
+            "type": "string"
+          },
+          "description": "命中这些 glob 的新建文件夹不会自动创建文件。"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "tsc -p ./ && node out/rules.test.js"
+  },
+  "dependencies": {
+    "minimatch": "^5.1.6"
+  },
+  "devDependencies": {
+    "@types/minimatch": "^5.1.2",
+    "@types/node": "^16.18.126",
+    "@types/vscode": "^1.85.0",
+    "typescript": "^5.4.5"
+  }
+}

@@ -1,0 +1,13 @@
+src/**
+tsconfig.json
+**/*.map
+**/*.test.js
+node_modules/**
+!node_modules/minimatch/
+!node_modules/minimatch/**
+!node_modules/brace-expansion/
+!node_modules/brace-expansion/**
+!node_modules/balanced-match/
+!node_modules/balanced-match/**
+.vscode/**
+.gitignore
