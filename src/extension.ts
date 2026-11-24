@@ -167,6 +167,7 @@ async function createDirectorySkippingAuto(uri: vscode.Uri, output: vscode.Outpu
   skippedDirectories.add(key);
   try {
     await vscode.workspace.fs.createDirectory(uri);
+    skippedDirectories.delete(key);
     return true;
   } catch (error: unknown) {
     skippedDirectories.delete(key);
