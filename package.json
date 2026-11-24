@@ -88,7 +88,7 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
-    "test": "tsc -p ./ && node out/rules.test.js"
+    "test": "tsc -p ./ && node out/rules.test.js && node out/templates.test.js"
   },
   "dependencies": {
     "minimatch": "^5.1.6"
